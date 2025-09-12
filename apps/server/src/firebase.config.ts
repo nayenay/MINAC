@@ -8,7 +8,5 @@ if (!admin.apps.length) {
   });
 }
 
-// Exponer RTDB y (si ya existía) Firestore sin romperlo
 export const rtdb = admin.database();
-export const firestore = admin.firestore?.();
 export { admin };

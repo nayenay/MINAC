@@ -8,13 +8,12 @@ export class MonitoreoController {
 
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
-  async crear(@Body() body: MonitoreoDto) {
+  crear(@Body() body: MonitoreoDto) {
     const { idEquipo, gas, temperatura } = body;
     return this.service.upsert(idEquipo, gas, temperatura);
-  }
-
+    }
   @Get(':idEquipo')
-  async obtener(@Param('idEquipo') idEquipo: string) {
+  obtener(@Param('idEquipo') idEquipo: string) {
     return this.service.getOne(idEquipo);
   }
 }
