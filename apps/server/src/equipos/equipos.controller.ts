@@ -16,19 +16,4 @@ export class EquiposController {
   findAll() {
     return this.equiposService.findAll();
   }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.equiposService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateEquipoDto: UpdateEquipoDto) {
-    return this.equiposService.update(id, updateEquipoDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.equiposService.remove(id);
-  }
 }

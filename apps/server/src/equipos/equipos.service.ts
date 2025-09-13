@@ -17,16 +17,4 @@ export class EquiposService {
   async findAll() {
     return this.equipoModel.find().exec();
   }
-
-  async findOne(id: string) {
-    return this.equipoModel.findById(id).exec();
-  }
-
-  async update(id: string, updateEquipoDto: UpdateEquipoDto) {
-    return this.equipoModel.findByIdAndUpdate(id, updateEquipoDto, { new: true });
-  }
-
-  async remove(id: string) {
-    return this.equipoModel.findByIdAndDelete(id);
-  }
 }
