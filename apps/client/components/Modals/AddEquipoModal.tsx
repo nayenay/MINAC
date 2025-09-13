@@ -5,6 +5,7 @@ import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import Input from "@/components/Input";
 import { Button } from "@heroui/react";
 import { useEquipos } from "@/context/EquiposContext";
+import { useRouter } from "next/router";
 
 interface AddEquipoModalProps {
   visible: boolean;
@@ -27,6 +28,7 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
   } = useForm();
   const [loading, setLoading] = useState(false);
   const { createEquipo } = useEquipos();
+  const router = useRouter();
 
   const handleClose = () => {
     setVisible(false);
@@ -37,7 +39,8 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
     setLoading(true);
     createEquipo(data);
     setLoading(false);
-    handleClose();
+    router.reload();
+    //handleClose();
   };
 
   return (
@@ -51,7 +54,10 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
           <h1 className="text-[20px] font-bold">Agregar Equipo</h1>
         </ModalHeader>
         <ModalBody>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-center justify-center gap-6">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="flex flex-col items-center justify-center gap-6"
+          >
             <Controller
               name="_id"
               control={control}

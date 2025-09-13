@@ -39,11 +39,12 @@ function Equipos() {
               key={equipo.idEquipo}
             >
               <CardBody className="text-white p-7 flex flex-col gap-4">
-                <div className="flex justify-between">
+                <div className="flex items-center gap-6">
                   <IconBrandAppleArcade size={80} color="#F8B519"/>
                   <div>
-                    <h2 className="text-[28px] font-bold">ID: {equipo.idEquipo}</h2>
+                    <h2 className="text-[28px] font-bold">ID: {equipo._id}</h2>
                     <p className="text-[16px]">Ubicacion: {equipo.ubicacion}</p>
+                    <p className="text-[16px]">Altura: {equipo.altura}</p>
                   </div>
                 </div>
               </CardBody>
