@@ -37,7 +37,9 @@ El calentador de cada sensor necesita estabilizarse térmicamente antes de que c
 | Sensor | Burn-in inicial (primera vez) | Estabilización en encendidos posteriores |
 |---|---|---|
 | MQ-2 | Mínimo 24h (dato de fabricante) | 2-5 min |
+| MQ-3 | 24-48h | 2-5 min |
 | MQ-7 | 24-48h (tiene ciclo de calentamiento alternado 5V/1.4V — más lento en estabilizar) | 2-5 min |
+| MQ-9 | 24-48h (también con calentamiento alternado 5V/1.5V, igual que el MQ-7) | 2-5 min |
 | MQ-135 | 24-48h | 2-5 min |
 | MQ-136 | 24-48h (es de los más sensibles a drift por humedad) | 2-5 min |
 
@@ -58,7 +60,15 @@ Las curvas de concentración de cada gas vienen en escala log-log en el datashee
 
 Ejemplo de referencia (curva de LPG en el datasheet del MQ-2): un punto cercano a 200 ppm con razón ~1.7, y otro cercano a 10,000 ppm con razón ~0.28.
 
-**Deben repetir esta extracción para cada uno de sus 4 sensores, usando la curva específica del gas que les interesa de CADA datasheet individual** (MQ-7 → curva de CO, MQ-135 → curva de calidad de aire/CO2 aproximado, MQ-136 → curva de H2S). No usen los mismos puntos del MQ-2 para los demás sensores — cada curva es distinta y usar la incorrecta invalida la medición.
+**Deben repetir esta extracción para cada sensor, usando la curva específica del gas que les interesa de CADA datasheet individual:**
+
+- MQ-7 → curva de CO
+- MQ-9 → curva de CO (para cruzar contra el MQ-7) o curva de gases combustibles (CH4/GLP), según qué quieran validar
+- MQ-135 → curva de calidad de aire/CO2 aproximado
+- MQ-136 → curva de H2S
+- MQ-3 → curva de alcohol/etanol (no corresponde a ninguno de los 6 gases objetivo de MINAC; útil solo como sensor de respaldo o para pruebas de interferencia cruzada, no para producción)
+
+No usen los mismos puntos del MQ-2 para los demás sensores — cada curva es distinta y usar la incorrecta invalida la medición.
 
 Con los dos puntos, la fórmula general es:
 
