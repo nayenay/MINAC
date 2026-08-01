@@ -1,13 +1,38 @@
-import { IsString, IsBoolean, IsOptional, IsNotEmpty} from "class-validator";
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsNotEmpty,
+  IsIn,
+} from 'class-validator';
 
 export class CreateMonitoreoDto {
-    @IsString()
-    @IsNotEmpty()
-    idEquipo: string;
+  @IsString()
+  @IsNotEmpty()
+  idEquipo: string;
 
-    @IsString()
-    gas: string;
+  @IsNumber()
+  mq2: number;
 
-    @IsString()
-    temperatura: string;
+  @IsNumber()
+  mq7: number;
+
+  @IsNumber()
+  mq135: number;
+
+  @IsNumber()
+  mq136: number;
+
+  @IsNumber()
+  @IsOptional()
+  timestamp?: number;
+
+  @IsString()
+  @IsOptional()
+  @IsIn(['directo', 'retransmitido'])
+  via?: 'directo' | 'retransmitido';
+
+  @IsString()
+  @IsOptional()
+  retransmitidoPor?: string;
 }

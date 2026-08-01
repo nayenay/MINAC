@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { MonitoreoService } from './monitoreo.service';
 import { CreateMonitoreoDto } from './dto/create-monitoreo.dto';
 
@@ -14,5 +14,10 @@ export class MonitoreoController {
   @Get()
   findAll() {
     return this.monitoreoService.findAll();
+  }
+
+  @Get('historico/:idEquipo')
+  findHistorico(@Param('idEquipo') idEquipo: string) {
+    return this.monitoreoService.findHistorico(idEquipo);
   }
 }
