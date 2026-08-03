@@ -1,11 +1,11 @@
 /*
-  MINAC - Nodo SIN CONEXIÓN GARANTIZADA
-  Intenta enviar directo a la API por WiFi. Si no logra conectarse en el
-  tiempo límite (simulando una zona de la mina sin señal), envía su
-  lectura por radio NRF24L01 al nodo Gateway para que él la retransmita.
+  MINAC - NODO 1 (sin conexión garantizada)
+  Lee los 4 sensores MQ, calcula ppm en vivo (Rs/Ro + coeficientes del
+  datasheet), e intenta enviar directo a la API por WiFi. Si no hay
+  señal, retransmite por radio NRF24L01 al Nodo 2 (gateway).
 
   Conexiones: mismas que en pruebas anteriores
-  (ADS1115 por I2C, NRF24L01 por SPI, 4 sensores MQ con divisor de voltaje)
+  (ADS1115 por I2C, NRF24L01 por SPI, 4 sensores MQ con divisor 10k/20k)
 
   Librerías requeridas: Adafruit ADS1X15, RF24 (TMRh20), WiFi (incluida en ESP32)
 */
@@ -16,14 +16,15 @@
 #include <RF24.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <math.h>
 
 // ============================================================
 // >>> CONFIGURAR ANTES DE SUBIR <<<
 #define NODO_ID 1
-const char* WIFI_SSID     = "Prueba";
-const char* WIFI_PASSWORD = "sinconexion";
+const char* WIFI_SSID     = "NOMBRE_DE_TU_RED";
+const char* WIFI_PASSWORD = "CONTRASEÑA";
 const char* API_URL       = "https://minac-production-9424.up.railway.app/monitoreo";
-const unsigned long TIMEOUT_WIFI_MS = 5000; // Tiempo máximo esperando señal
+const unsigned long TIMEOUT_WIFI_MS = 5000;
 // ============================================================
 
 #define CE_PIN 4
@@ -32,32 +33,138 @@ const unsigned long TIMEOUT_WIFI_MS = 5000; // Tiempo máximo esperando señal
 Adafruit_ADS1115 ads;
 RF24 radio(CE_PIN, CSN_PIN);
 
-const byte direccion[6] = "GATE1"; // Debe coincidir con el pipe del gateway
+const byte direccion[6] = "GATE1";
 
-const float FACTOR_DIVISOR = 30.0 / 20.0;
+const float FACTOR_DIVISOR = 30.0 / 20.0; // R1=10k, R2=20k
+const float VC = 5.0;
+
+// --- Vout0 del Nodo 1 (calibración confirmada, aire limpio) ---
+struct ConfigSensor {
+  const char* nombre;
+  float a, b;
+  float rsRoMin, rsRoMax;
+  float vout0;
+};
+
+// ============================================================
+// Semáforo (3 LEDs) - pines sugeridos, no chocan con I2C/SPI
+// ============================================================
+#define LED_VERDE    15
+#define LED_AMARILLO 16
+#define LED_ROJO     17
+
+ConfigSensor sensores[4] = {
+  { "MQ-2",   591.283f, -2.0765f, 0.256f, 1.685f, 0.9658f },
+  { "MQ-3",     0.3923f, -1.4932f, 0.114f, 2.498f, 1.2645f },
+  { "MQ-135", 110.379f, -2.7217f, 0.804f, 2.416f, 1.4056f },
+  { "MQ-9",   400.0f,   -2.0f,    0.2f,   2.0f,   0.1993f },
+};
+
+// Umbrales de semáforo por sensor (ppm). MQ-3 no participa (incluir=false)
+// porque no es uno de los gases objetivo de MINAC.
+struct UmbralSemaforo {
+  float amarillo, rojo;
+  bool incluir;
+};
+
+UmbralSemaforo umbrales[4] = {
+  { 1000.0f, 5000.0f, true  }, // MQ-2
+  { 0.0f,    0.0f,    false }, // MQ-3 (no participa)
+  { 1000.0f, 5000.0f, true  }, // MQ-135
+  { 35.0f,   200.0f,  true  }, // MQ-9
+};
 
 struct PaqueteSensores {
   uint8_t  nodo_id;
   float    mq2;
-  float    mq7;
+  float    mq3;
   float    mq135;
-  float    mq136;
+  float    mq9;
+  uint8_t  fueraDeRangoBits; // bit0=MQ2, bit1=MQ3, bit2=MQ135, bit3=MQ9
   uint32_t timestamp_ms;
-  uint8_t  retransmitido; // 0 = enviado directo, 1 = llegó por radio a través de otro nodo
+  uint8_t  retransmitido;
 };
 
 PaqueteSensores paquete;
 unsigned long ultimaLectura = 0;
 const unsigned long INTERVALO_MS = 5000;
 
-void leerSensores(PaqueteSensores &p) {
-  p.nodo_id       = NODO_ID;
-  p.mq2           = ads.computeVolts(ads.readADC_SingleEnded(0)) * FACTOR_DIVISOR;
-  p.mq7           = ads.computeVolts(ads.readADC_SingleEnded(1)) * FACTOR_DIVISOR;
-  p.mq135         = ads.computeVolts(ads.readADC_SingleEnded(2)) * FACTOR_DIVISOR;
-  p.mq136         = ads.computeVolts(ads.readADC_SingleEnded(3)) * FACTOR_DIVISOR;
+float leerVoltajeSensor(int canal) {
+  int16_t crudo = ads.readADC_SingleEnded(canal);
+  float voltajeADC = ads.computeVolts(crudo);
+  return voltajeADC * FACTOR_DIVISOR;
+}
+
+float calcularPPM(ConfigSensor &s, float voutActual, bool &fueraDeRango) {
+  if (voutActual <= 0.001) {
+    fueraDeRango = true;
+    return 0.0f;
+  }
+  float numerador = (VC - voutActual) / voutActual;
+  float denominador = (VC - s.vout0) / s.vout0;
+  float rsRo = numerador / denominador;
+  float ppm = s.a * pow(rsRo, s.b);
+  fueraDeRango = !(rsRo >= s.rsRoMin && rsRo <= s.rsRoMax);
+  return ppm;
+}
+
+void leerYCalcularSensores(PaqueteSensores &p) {
+  p.nodo_id = NODO_ID;
+  p.fueraDeRangoBits = 0;
+
+  bool fdr;
+  p.mq2 = calcularPPM(sensores[0], leerVoltajeSensor(0), fdr);
+  if (fdr) p.fueraDeRangoBits |= (1 << 0);
+
+  p.mq3 = calcularPPM(sensores[1], leerVoltajeSensor(1), fdr);
+  if (fdr) p.fueraDeRangoBits |= (1 << 1);
+
+  p.mq135 = calcularPPM(sensores[2], leerVoltajeSensor(2), fdr);
+  if (fdr) p.fueraDeRangoBits |= (1 << 2);
+
+  p.mq9 = calcularPPM(sensores[3], leerVoltajeSensor(3), fdr);
+  if (fdr) p.fueraDeRangoBits |= (1 << 3);
+
   p.timestamp_ms  = millis();
   p.retransmitido = 0;
+}
+
+String fueraDeRangoTexto(uint8_t bits) {
+  String resultado = "";
+  const char* nombres[4] = { "MQ-2", "MQ-3", "MQ-135", "MQ-9" };
+  for (int i = 0; i < 4; i++) {
+    if (bits & (1 << i)) {
+      if (resultado.length() > 0) resultado += ",";
+      resultado += nombres[i];
+    }
+  }
+  return resultado;
+}
+
+// 0 = verde, 1 = amarillo, 2 = rojo, -1 = no participa en el semáforo
+int estadoDeSensor(int indice, float ppm, bool fueraDeRango) {
+  if (!umbrales[indice].incluir) return -1;
+  if (fueraDeRango) return 2; // Saturado/incierto -> se asume el peor caso
+  if (ppm >= umbrales[indice].rojo) return 2;
+  if (ppm >= umbrales[indice].amarillo) return 1;
+  return 0;
+}
+
+int calcularEstadoGeneral(const PaqueteSensores &p) {
+  float valores[4] = { p.mq2, p.mq3, p.mq135, p.mq9 };
+  int peor = 0;
+  for (int i = 0; i < 4; i++) {
+    bool fdr = p.fueraDeRangoBits & (1 << i);
+    int estado = estadoDeSensor(i, valores[i], fdr);
+    if (estado > peor) peor = estado;
+  }
+  return peor;
+}
+
+void actualizarSemaforo(int estado) {
+  digitalWrite(LED_VERDE,    estado == 0 ? HIGH : LOW);
+  digitalWrite(LED_AMARILLO, estado == 1 ? HIGH : LOW);
+  digitalWrite(LED_ROJO,     estado == 2 ? HIGH : LOW);
 }
 
 bool enviarDirectoAPI(const PaqueteSensores &p) {
@@ -65,17 +172,18 @@ bool enviarDirectoAPI(const PaqueteSensores &p) {
   http.begin(API_URL);
   http.addHeader("Content-Type", "application/json");
 
-  // Formato que espera el CreateMonitoreoDto real del backend
   String idEquipo = "ESP32-00" + String(p.nodo_id);
+  String fdr = fueraDeRangoTexto(p.fueraDeRangoBits);
 
   String json = "{";
   json += "\"idEquipo\":\"" + idEquipo + "\",";
-  json += "\"mq2\":" + String(p.mq2, 3) + ",";
-  json += "\"mq7\":" + String(p.mq7, 3) + ",";
-  json += "\"mq135\":" + String(p.mq135, 3) + ",";
-  json += "\"mq136\":" + String(p.mq136, 3) + ",";
+  json += "\"mq2\":" + String(p.mq2, 2) + ",";
+  json += "\"mq3\":" + String(p.mq3, 2) + ",";
+  json += "\"mq135\":" + String(p.mq135, 2) + ",";
+  json += "\"mq9\":" + String(p.mq9, 2) + ",";
   json += "\"timestamp\":" + String(p.timestamp_ms) + ",";
-  json += "\"via\":\"directo\"";
+  json += "\"via\":\"directo\",";
+  json += "\"fueraDeRango\":\"" + fdr + "\"";
   json += "}";
 
   int codigo = http.POST(json);
@@ -97,7 +205,14 @@ void enviarPorRadio(const PaqueteSensores &p) {
 void setup() {
   Serial.begin(115200);
   delay(500);
-  Serial.println("=== MINAC - Nodo sin conexión garantizada ===");
+  Serial.println("=== MINAC - Nodo 1 (sin conexión garantizada) ===");
+
+  pinMode(LED_VERDE, OUTPUT);
+  pinMode(LED_AMARILLO, OUTPUT);
+  pinMode(LED_ROJO, OUTPUT);
+  digitalWrite(LED_VERDE, HIGH); // Estado inicial: verde, hasta la primera lectura
+  digitalWrite(LED_AMARILLO, LOW);
+  digitalWrite(LED_ROJO, LOW);
 
   Wire.begin(21, 22);
   if (!ads.begin(0x48)) {
@@ -121,17 +236,29 @@ void loop() {
   if (millis() - ultimaLectura >= INTERVALO_MS) {
     ultimaLectura = millis();
 
-    leerSensores(paquete);
+    leerYCalcularSensores(paquete);
+
+    int estado = calcularEstadoGeneral(paquete);
+    actualizarSemaforo(estado);
+
     Serial.println("---------------------------------------------");
-    Serial.print("[LECTURA PROPIA] MQ-2: ");
-    Serial.print(paquete.mq2, 3);
-    Serial.print("V | MQ-7: ");
-    Serial.print(paquete.mq7, 3);
-    Serial.print("V | MQ-135: ");
-    Serial.print(paquete.mq135, 3);
-    Serial.print("V | MQ-136: ");
-    Serial.print(paquete.mq136, 3);
-    Serial.println("V");
+    Serial.print("[SEMÁFORO] ");
+    Serial.println(estado == 0 ? "VERDE" : (estado == 1 ? "AMARILLO" : "ROJO"));
+    Serial.print("[LECTURA] MQ-2: ");
+    Serial.print(paquete.mq2, 1);
+    Serial.print(" ppm | MQ-3: ");
+    Serial.print(paquete.mq3, 1);
+    Serial.print(" ppm | MQ-135: ");
+    Serial.print(paquete.mq135, 1);
+    Serial.print(" ppm | MQ-9: ");
+    Serial.print(paquete.mq9, 1);
+    Serial.println(" ppm");
+
+    String fdr = fueraDeRangoTexto(paquete.fueraDeRangoBits);
+    if (fdr.length() > 0) {
+      Serial.print("Fuera de rango: ");
+      Serial.println(fdr);
+    }
 
     Serial.print("Intentando WiFi (máx ");
     Serial.print(TIMEOUT_WIFI_MS / 1000);
@@ -146,7 +273,7 @@ void loop() {
     if (WiFi.status() == WL_CONNECTED) {
       Serial.println("WiFi conectado. Enviando directo a la API.");
       enviarDirectoAPI(paquete);
-      WiFi.disconnect(true); // Se apaga para no interferir con el radio ni gastar energía
+      WiFi.disconnect(true);
     } else {
       Serial.println("SIN SEÑAL WIFI. Retransmitiendo por radio al gateway.");
       WiFi.disconnect(true);

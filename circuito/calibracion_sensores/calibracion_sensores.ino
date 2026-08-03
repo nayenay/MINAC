@@ -22,13 +22,13 @@
 // ============================================================
 // >>> CONFIGURAR ANTES DE SUBIR <<<
 enum ModoOperacion { BURN_IN, CALIBRAR };
-const ModoOperacion MODO = BURN_IN; // Cambiar a CALIBRAR cuando el burn-in termine
+const ModoOperacion MODO = CALIBRAR; // Cambiar a CALIBRAR cuando el burn-in termine
 // ============================================================
 
 Adafruit_ADS1115 ads;
 const float FACTOR_DIVISOR = 30.0 / 20.0; // R1=10k, R2=20k
 
-const char* NOMBRE_SENSOR[4] = { "MQ-2", "MQ-7", "MQ-135", "MQ-136" };
+const char* NOMBRE_SENSOR[4] = { "MQ2", "MQ3", "MQ135", "MQ9" };
 
 // --- Variables para modo CALIBRAR ---
 const int MUESTRAS_CALIBRACION = 50;
