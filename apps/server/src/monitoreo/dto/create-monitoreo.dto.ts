@@ -15,13 +15,13 @@ export class CreateMonitoreoDto {
   mq2: number;
 
   @IsNumber()
-  mq7: number;
+  mq3: number;
 
   @IsNumber()
   mq135: number;
 
   @IsNumber()
-  mq136: number;
+  mq9: number;
 
   @IsNumber()
   @IsOptional()
@@ -35,4 +35,11 @@ export class CreateMonitoreoDto {
   @IsString()
   @IsOptional()
   retransmitidoPor?: string;
+
+  // Lista separada por comas de sensores cuya lectura salió del rango
+  // validado del datasheet en esta muestra (ej. "MQ-135,MQ-9"). Vacío
+  // si todos los sensores dieron lecturas confiables.
+  @IsString()
+  @IsOptional()
+  fueraDeRango?: string;
 }

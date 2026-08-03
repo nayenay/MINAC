@@ -2,22 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { CreateMonitoreoDto } from './dto/create-monitoreo.dto';
 import { db } from '../firebase';
 
-// Forma real de un registro guardado (DTO + timestamp garantizado)
 export interface MonitoreoRecord {
   idEquipo: string;
   mq2: number;
-  mq7: number;
+  mq3: number;
   mq135: number;
-  mq136: number;
+  mq9: number;
   timestamp: number;
   via?: 'directo' | 'retransmitido';
   retransmitidoPor?: string;
+  fueraDeRango?: string;
 }
 
-// findAll() regresa un diccionario { idEquipo: MonitoreoRecord }
 type MonitoreoPorEquipo = Record<string, MonitoreoRecord> | null;
-
-// findHistorico() regresa un diccionario { pushKeyDeFirebase: MonitoreoRecord }
 type HistoricoPorClave = Record<string, MonitoreoRecord> | null;
 
 @Injectable()
