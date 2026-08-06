@@ -1,0 +1,93 @@
+<svg width="1000" height="620" viewBox="0 0 1000 620" xmlns="http://www.w3.org/2000/svg" font-family="Helvetica, Arial, sans-serif">
+  <rect width="1000" height="620" fill="#ffffff"/>
+  <text x="250" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a1a1a">Pantalla 1: Dashboard general</text>
+  <text x="750" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="#1a1a1a">Pantalla 2: Detalle de nodo</text>
+
+  <!-- ===================== PANTALLA 1 ===================== -->
+  <rect x="20" y="40" width="460" height="560" rx="6" fill="#fafafa" stroke="#999" stroke-width="1.5"/>
+
+  <!-- header -->
+  <rect x="20" y="40" width="460" height="50" fill="#e5e5e5" stroke="#999"/>
+  <text x="40" y="70" font-size="13" font-weight="bold" fill="#333">MINAC - Monitoreo en tiempo real</text>
+  <circle cx="450" cy="65" r="8" fill="#bbb"/>
+
+  <!-- tarjeta nodo 1 -->
+  <rect x="40" y="110" width="420" height="90" rx="6" fill="#fff" stroke="#ccc"/>
+  <circle cx="65" cy="140" r="14" fill="#22c55e"/>
+  <text x="65" y="145" text-anchor="middle" font-size="9" fill="#fff" font-weight="bold">OK</text>
+  <text x="95" y="135" font-size="12" font-weight="bold" fill="#333">Nodo 1 - ESP32-001</text>
+  <text x="95" y="150" font-size="10" fill="#666">Sin conexión directa · retransmite por Nodo 2</text>
+  <rect x="95" y="160" width="80" height="26" rx="4" fill="#f3f4f6" stroke="#ddd"/>
+  <text x="135" y="177" text-anchor="middle" font-size="9" fill="#555">MQ-2: 320 ppm</text>
+  <rect x="180" y="160" width="80" height="26" rx="4" fill="#f3f4f6" stroke="#ddd"/>
+  <text x="220" y="177" text-anchor="middle" font-size="9" fill="#555">MQ-135: 480</text>
+  <rect x="265" y="160" width="80" height="26" rx="4" fill="#f3f4f6" stroke="#ddd"/>
+  <text x="305" y="177" text-anchor="middle" font-size="9" fill="#555">MQ-9: 12 ppm</text>
+  <rect x="350" y="160" width="90" height="26" rx="4" fill="#f3f4f6" stroke="#ddd"/>
+  <text x="395" y="177" text-anchor="middle" font-size="9" fill="#555">Ver detalle &gt;</text>
+
+  <!-- tarjeta nodo 2 (rojo, ejemplo de alerta) -->
+  <rect x="40" y="215" width="420" height="90" rx="6" fill="#fff" stroke="#ccc"/>
+  <circle cx="65" cy="245" r="14" fill="#ef4444"/>
+  <text x="65" y="250" text-anchor="middle" font-size="9" fill="#fff" font-weight="bold">!</text>
+  <text x="95" y="240" font-size="12" font-weight="bold" fill="#333">Nodo 2 - ESP32-002 (Gateway)</text>
+  <text x="95" y="255" font-size="10" fill="#666">Con conexión WiFi directa</text>
+  <rect x="95" y="265" width="80" height="26" rx="4" fill="#fee2e2" stroke="#fca5a5"/>
+  <text x="135" y="282" text-anchor="middle" font-size="9" fill="#991b1b">MQ-9: 240 ppm</text>
+  <rect x="180" y="265" width="80" height="26" rx="4" fill="#f3f4f6" stroke="#ddd"/>
+  <text x="220" y="282" text-anchor="middle" font-size="9" fill="#555">MQ-2: 150 ppm</text>
+  <rect x="265" y="265" width="80" height="26" rx="4" fill="#f3f4f6" stroke="#ddd"/>
+  <text x="305" y="282" text-anchor="middle" font-size="9" fill="#555">MQ-135: N/D</text>
+  <rect x="350" y="265" width="90" height="26" rx="4" fill="#f3f4f6" stroke="#ddd"/>
+  <text x="395" y="282" text-anchor="middle" font-size="9" fill="#555">Ver detalle &gt;</text>
+
+  <!-- placeholder mapa/plano -->
+  <rect x="40" y="325" width="420" height="240" rx="6" fill="#f3f4f6" stroke="#ccc" stroke-dasharray="5,4"/>
+  <text x="250" y="350" text-anchor="middle" font-size="11" fill="#888">Plano de la mina (futuro: heatmap Plotly.js)</text>
+  <circle cx="140" cy="450" r="10" fill="#22c55e" stroke="#166534"/>
+  <text x="140" y="475" text-anchor="middle" font-size="9" fill="#555">Nodo 1</text>
+  <circle cx="320" cy="480" r="10" fill="#ef4444" stroke="#7f1d1d"/>
+  <text x="320" y="505" text-anchor="middle" font-size="9" fill="#555">Nodo 2</text>
+  <line x1="140" y1="450" x2="320" y2="480" stroke="#999" stroke-dasharray="3,3"/>
+
+  <!-- ===================== PANTALLA 2 ===================== -->
+  <rect x="520" y="40" width="460" height="560" rx="6" fill="#fafafa" stroke="#999" stroke-width="1.5"/>
+
+  <rect x="520" y="40" width="460" height="50" fill="#e5e5e5" stroke="#999"/>
+  <text x="540" y="70" font-size="13" font-weight="bold" fill="#333">&lt; Nodo 2 - ESP32-002</text>
+
+  <!-- estado actual -->
+  <rect x="540" y="105" width="420" height="70" rx="6" fill="#fee2e2" stroke="#fca5a5"/>
+  <circle cx="565" cy="140" r="16" fill="#ef4444"/>
+  <text x="600" y="135" font-size="12" font-weight="bold" fill="#7f1d1d">Estado: ROJO</text>
+  <text x="600" y="150" font-size="10" fill="#7f1d1d">MQ-9 (CO) por encima del umbral de alerta</text>
+
+  <!-- selector de gas -->
+  <rect x="540" y="190" width="90" height="30" rx="4" fill="#dbeafe" stroke="#1d4ed8"/>
+  <text x="585" y="209" text-anchor="middle" font-size="9" fill="#1e3a5f">MQ-2</text>
+  <rect x="640" y="190" width="90" height="30" rx="4" fill="#f3f4f6" stroke="#ccc"/>
+  <text x="685" y="209" text-anchor="middle" font-size="9" fill="#555">MQ-135</text>
+  <rect x="740" y="190" width="90" height="30" rx="4" fill="#fee2e2" stroke="#dc2626"/>
+  <text x="785" y="209" text-anchor="middle" font-size="9" fill="#7f1d1d">MQ-9</text>
+  <rect x="840" y="190" width="90" height="30" rx="4" fill="#f3f4f6" stroke="#ccc"/>
+  <text x="885" y="209" text-anchor="middle" font-size="9" fill="#555">MQ-3</text>
+
+  <!-- grafica historica -->
+  <rect x="540" y="240" width="420" height="200" rx="6" fill="#fff" stroke="#ccc"/>
+  <text x="560" y="260" font-size="10" fill="#666">Histórico ppm (últimas 24h) - fuente: historico/idEquipo</text>
+  <polyline points="560,420 600,400 640,410 680,360 720,300 760,250 800,270 840,290 880,260 920,320"
+            fill="none" stroke="#dc2626" stroke-width="2"/>
+  <line x1="560" y1="430" x2="940" y2="430" stroke="#ccc"/>
+  <line x1="560" y1="250" x2="560" y2="430" stroke="#ccc"/>
+  <line x1="560" y1="300" x2="940" y2="300" stroke="#fca5a5" stroke-dasharray="4,3"/>
+  <text x="945" y="304" font-size="8" fill="#dc2626">umbral rojo</text>
+
+  <!-- tabla de lecturas fuera de rango -->
+  <rect x="540" y="460" width="420" height="120" rx="6" fill="#f9fafb" stroke="#ccc"/>
+  <text x="560" y="480" font-size="10" font-weight="bold" fill="#333">Lecturas marcadas "fuera de rango"</text>
+  <text x="560" y="500" font-size="9" fill="#666">14:32 - MQ-9 saturado (posible sobreexposición)</text>
+  <text x="560" y="516" font-size="9" fill="#666">14:28 - MQ-135 sin datos confiables (hardware)</text>
+  <text x="560" y="532" font-size="9" fill="#666">14:15 - MQ-9 saturado</text>
+
+  <text x="500" y="610" text-anchor="middle" font-size="10" fill="#666">MINAC - Wireframe de referencia (no es diseño final)</text>
+</svg>
