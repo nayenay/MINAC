@@ -6,14 +6,12 @@ import { IconBrandAppleArcade } from "@tabler/icons-react";
 import AddEquipoModal from "@/components/Modals/AddEquipoModal";
 
 function Equipos() {
-  const { equipos, createEquipo, fetchEquipos } = useEquipos();
-
+  const { equipos, fetchEquipos, loading, error } = useEquipos();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    fetchEquipos();
-    console.log(equipos)
-  }, []);
+    void fetchEquipos();
+  }, [fetchEquipos]);
 
   return (
     <Layout title="Equipos">
@@ -29,29 +27,44 @@ function Equipos() {
             Agregar
           </Button>
         </div>
-        <div className="grid grid-cols-2 gap-4">
-          {equipos.length != 0
-          ? equipos.map((equipo) => (
+
+        {error ? (
+          <div className="rounded-2xl border border-[#821600] bg-[#821600]/20 px-4 py-3 text-white text-sm">
+            {error}
+          </div>
+        ) : null}
+
+        {loading && equipos.length === 0 ? (
+          <p className="text-[#aaaaaa]">Cargando equipos…</p>
+        ) : null}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {!loading && equipos.length === 0 && !error ? (
+            <p>No hay equipos</p>
+          ) : null}
+          {equipos.map((equipo) => (
             <Card
               shadow="lg"
               radius="lg"
               className="bg-[#171717] rounded-3xl shadow-xl"
-              key={equipo.idEquipo}
+              key={equipo._id}
             >
               <CardBody className="text-white p-7 flex flex-col gap-4">
                 <div className="flex items-center gap-6">
-                  <IconBrandAppleArcade size={80} color="#F8B519"/>
+                  <IconBrandAppleArcade size={80} color="#F8B519" />
                   <div>
                     <h2 className="text-[28px] font-bold">ID: {equipo._id}</h2>
-                    <p className="text-[16px]">Ubicacion: {equipo.ubicacion}</p>
-                    <p className="text-[16px]">Altura: {equipo.altura}</p>
+                    <p className="text-[16px]">
+                      Ubicacion: {equipo.ubicacion ?? "—"}
+                    </p>
+                    <p className="text-[16px]">
+                      Altura: {equipo.altura ?? "—"}
+                    </p>
                   </div>
                 </div>
               </CardBody>
             </Card>
-          ))
-          : <p>No hay equipos</p>
-          }
+          ))}
         </div>
       </div>
       <AddEquipoModal visible={visible} setVisible={setVisible} />

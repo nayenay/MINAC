@@ -1,53 +1,64 @@
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
-import * as yup from "yup";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import Input from "@/components/Input";
 import { Button } from "@heroui/react";
 import { useEquipos } from "@/context/EquiposContext";
-import { useRouter } from "next/router";
+import type { CreateEquipoPayload } from "@/types/equipo";
 
 interface AddEquipoModalProps {
   visible: boolean;
   setVisible: Dispatch<SetStateAction<boolean>>;
 }
 
-const schema = yup.object().shape({
-  _id: yup.string().required(),
-  ubicacion: yup.string().nullable(),
-  altura: yup.string().nullable(),
-});
-
 function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
   const {
-    register,
     control,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm();
+  } = useForm<CreateEquipoPayload>({
+    defaultValues: {
+      _id: "",
+      ubicacion: "",
+      altura: "",
+    },
+  });
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const { createEquipo } = useEquipos();
-  const router = useRouter();
 
   const handleClose = () => {
     setVisible(false);
+    setSubmitError(null);
     reset();
   };
 
-  const onSubmit: SubmitHandler<any> = async (data) => {
+  const onSubmit: SubmitHandler<CreateEquipoPayload> = async (data) => {
     setLoading(true);
-    createEquipo(data);
-    setLoading(false);
-    router.reload();
-    //handleClose();
+    setSubmitError(null);
+    try {
+      const payload: CreateEquipoPayload = {
+        _id: data._id.trim(),
+        ubicacion: data.ubicacion?.trim() || undefined,
+        altura: data.altura?.trim() || undefined,
+      };
+      await createEquipo(payload);
+      handleClose();
+    } catch {
+      setSubmitError(
+        "No se pudo crear el equipo. Verifica el ID e intenta de nuevo.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Modal
       isOpen={visible}
-      onClose={() => setVisible(false)}
-      className="bg-[#171717]/95 w-[440px] h-[400px] p-1"
+      onClose={handleClose}
+      className="bg-[#171717]/95 w-[440px] h-auto min-h-[400px] p-1"
     >
       <ModalContent>
         <ModalHeader className="flex justify-center items-center">
@@ -61,13 +72,13 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
             <Controller
               name="_id"
               control={control}
+              rules={{ required: "El ID es obligatorio" }}
               render={({ field }) => (
                 <Input
                   {...field}
                   placeholder="ID del equipo"
                   label="ID"
-                  {...field}
-                  errorMessage={errors._id?.message as string}
+                  errorMessage={errors._id?.message}
                 />
               )}
             />
@@ -79,8 +90,7 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
                   {...field}
                   placeholder="Ubicacion del equipo"
                   label="Ubicacion"
-                  {...field}
-                  errorMessage={errors.ubicacion?.message as string}
+                  errorMessage={errors.ubicacion?.message}
                 />
               )}
             />
@@ -92,17 +102,22 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
                   {...field}
                   placeholder="Altura del equipo"
                   label="Altura"
-                  {...field}
-                  errorMessage={errors.altura?.message as string}
+                  errorMessage={errors.altura?.message}
                 />
               )}
             />
+            {submitError ? (
+              <p className="text-sm text-[#ff8a80] w-full text-left">
+                {submitError}
+              </p>
+            ) : null}
             <div className="flex justify-between w-full">
               <Button
                 variant="bordered"
                 radius="full"
                 className="border border-[#F8B519] text-[#F8B519] hover:bg-[#F8B519] hover:text-[#0F0F0F]"
-                onClick={() => setVisible(false)}
+                onClick={handleClose}
+                type="button"
               >
                 Cancelar
               </Button>

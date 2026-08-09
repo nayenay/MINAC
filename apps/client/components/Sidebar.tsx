@@ -5,7 +5,7 @@ import {
   IconLogout,
   IconChartBar,
 } from "@tabler/icons-react";
-import { Sidebar, Menu, MenuItem, SubMenu } from "react-pro-sidebar";
+import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { Button } from "@heroui/react";
 import { useRouter } from "next/router";
 
@@ -57,17 +57,19 @@ function Aside() {
           Equipos
         </MenuItem>
         <MenuItem
-          className="text-white text-base font-medium "
+          className="text-[#666666] text-base font-medium "
           icon={<IconChartBar />}
+          disabled
         >
-          Reportes
+          Reportes (próximamente)
         </MenuItem>
       </Menu>
       <Menu className="flex flex-col items-center mt-1 h-1/2 justify-end">
         <Button
           variant="bordered"
           radius="full"
-          className="border border-[#F8B519] text-[#F8B519] hover:bg-[#F8B519] hover:text-[#0F0F0F]"
+          isDisabled
+          className="border border-[#555555] text-[#666666] opacity-60"
           startContent={<IconLogout size={24} />}
         >
           Cerrar Sesion
