@@ -1,6 +1,7 @@
 import type { HistoricoEntry } from "../../types/monitoreo";
 import { formatViaLabel } from "../../utils/monitoreoStatus";
 import { formatDeviceTimestamp } from "../../utils/historico";
+import EmptyState from "../monitoring/EmptyState";
 
 interface OutOfRangeListProps {
   entries: HistoricoEntry[];
@@ -9,9 +10,10 @@ interface OutOfRangeListProps {
 export default function OutOfRangeList({ entries }: OutOfRangeListProps) {
   if (entries.length === 0) {
     return (
-      <p className="text-[#888888] text-sm">
-        Sin lecturas fuera de rango registradas
-      </p>
+      <EmptyState
+        title="Sin lecturas fuera de rango"
+        description="No hay lecturas fuera de rango registradas en el histórico disponible."
+      />
     );
   }
 
@@ -20,7 +22,7 @@ export default function OutOfRangeList({ entries }: OutOfRangeListProps) {
       {entries.map((entry) => {
         const via =
           formatViaLabel(entry.record.via, entry.record.retransmitidoPor) ??
-          "N/D";
+          "No disponible";
         return (
           <li
             key={entry.key}

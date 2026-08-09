@@ -1,5 +1,6 @@
 import React from "react";
 import Layout from "../components/Layout";
+import AlertBanner from "../components/monitoring/AlertBanner";
 import EmptyState from "../components/monitoring/EmptyState";
 import LoadingState from "../components/monitoring/LoadingState";
 import MonitoringCard from "../components/monitoring/MonitoringCard";
@@ -19,29 +20,38 @@ function HomePage() {
 
   return (
     <Layout title="MINAC - Monitoreo">
-      <div className="flex flex-col gap-4 pb-8">
-        <h1 className="text-[28px] md:text-[40px] font-bold">
-          MINAC - Monitoreo en tiempo real
-        </h1>
+      <div className="flex flex-col gap-5 pb-8">
+        <header className="flex flex-col gap-2">
+          <h1 className="text-[26px] font-bold leading-tight md:text-[36px]">
+            MINAC - Monitoreo en tiempo real
+          </h1>
+          <p className="max-w-2xl text-sm text-[#888888] md:text-base">
+            Lecturas actuales de los nodos ESP32. El detalle histórico está en
+            cada nodo.
+          </p>
+          {!initialLoading && nodes.length > 0 ? (
+            <p className="text-xs text-[#666666]">
+              {nodes.length} nodo{nodes.length === 1 ? "" : "s"} en vista
+            </p>
+          ) : null}
+        </header>
 
         {equiposError ? (
-          <div className="rounded-2xl border border-[#F8B519]/40 bg-[#F8B519]/10 px-4 py-3 text-[#F8B519] text-sm">
-            {equiposError}
-          </div>
+          <AlertBanner tone="warning">{equiposError}</AlertBanner>
         ) : null}
 
         {refreshWarning ? (
-          <div className="rounded-2xl border border-[#F8B519]/40 bg-[#F8B519]/10 px-4 py-3 text-[#F8B519] text-sm">
-            {refreshWarning}
-          </div>
+          <AlertBanner tone="warning">{refreshWarning}</AlertBanner>
         ) : null}
 
-        {initialLoading ? <LoadingState /> : null}
+        {initialLoading ? (
+          <LoadingState message="Cargando monitoreo…" />
+        ) : null}
 
         {!initialLoading && showBlockingError ? (
           <EmptyState
             title="No se pudo cargar el monitoreo"
-            description="Verifica que el backend esté disponible y que NEXT_PUBLIC_BACKEND_URL esté configurada."
+            description="Verifica la conexión con el servidor y que NEXT_PUBLIC_BACKEND_URL esté configurada."
           />
         ) : null}
 
@@ -53,7 +63,7 @@ function HomePage() {
         ) : null}
 
         {!initialLoading && !showBlockingError && nodes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             {nodes.map((node) => (
               <MonitoringCard key={node.id} node={node} />
             ))}

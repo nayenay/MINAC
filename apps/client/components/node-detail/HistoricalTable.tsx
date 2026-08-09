@@ -5,6 +5,7 @@ import {
   SENSOR_LABELS,
 } from "../../utils/monitoreoStatus";
 import { formatDeviceTimestamp } from "../../utils/historico";
+import EmptyState from "../monitoring/EmptyState";
 
 interface HistoricalTableProps {
   sensor: SensorKey;
@@ -19,25 +20,39 @@ export default function HistoricalTable({
 
   if (entries.length === 0) {
     return (
-      <p className="text-[#888888] text-sm">
-        No hay histórico disponible para este nodo.
-      </p>
+      <EmptyState
+        title="Histórico vacío"
+        description="No hay histórico disponible para este nodo."
+      />
     );
   }
 
   return (
     <div className="overflow-x-auto rounded-2xl border border-[#333333]">
       <table className="min-w-full text-left text-sm text-white">
+        <caption className="sr-only">
+          Histórico del sensor {sensorLabel.name}
+        </caption>
         <thead className="bg-[#1f1f1f] text-[#aaaaaa]">
           <tr>
-            <th className="px-4 py-3 font-medium">#</th>
-            <th className="px-4 py-3 font-medium">Marca del dispositivo</th>
-            <th className="px-4 py-3 font-medium">
+            <th scope="col" className="px-4 py-3 font-medium">
+              #
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Marca del dispositivo
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
               {sensorLabel.name} ({sensorLabel.gas})
             </th>
-            <th className="px-4 py-3 font-medium">Vía</th>
-            <th className="px-4 py-3 font-medium">Fuera de rango</th>
-            <th className="px-4 py-3 font-medium">Estado sensor</th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Vía
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Fuera de rango
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              Estado sensor
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +62,7 @@ export default function HistoricalTable({
               formatViaLabel(
                 entry.record.via,
                 entry.record.retransmitidoPor,
-              ) ?? "N/D";
+              ) ?? "No disponible";
             const fuera = entry.record.fueraDeRango?.trim()
               ? entry.record.fueraDeRango
               : "—";
@@ -58,7 +73,7 @@ export default function HistoricalTable({
                 className="border-t border-[#333333] odd:bg-[#171717] even:bg-[#141414]"
               >
                 <td className="px-4 py-3 text-[#888888]">{index + 1}</td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="whitespace-nowrap px-4 py-3">
                   {formatDeviceTimestamp(entry.record.timestamp)}
                 </td>
                 <td className="px-4 py-3 font-semibold">

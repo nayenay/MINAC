@@ -58,11 +58,11 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
     <Modal
       isOpen={visible}
       onClose={handleClose}
-      className="bg-[#171717]/95 w-[440px] h-auto min-h-[400px] p-1"
+      className="h-auto min-h-[400px] w-[min(440px,calc(100vw-2rem))] bg-[#171717]/95 p-1"
     >
       <ModalContent>
-        <ModalHeader className="flex justify-center items-center">
-          <h1 className="text-[20px] font-bold">Agregar Equipo</h1>
+        <ModalHeader className="flex items-center justify-center">
+          <h1 className="text-[20px] font-bold">Agregar equipo</h1>
         </ModalHeader>
         <ModalBody>
           <form
@@ -88,8 +88,8 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
               render={({ field }) => (
                 <Input
                   {...field}
-                  placeholder="Ubicacion del equipo"
-                  label="Ubicacion"
+                  placeholder="Ubicación del equipo"
+                  label="Ubicación"
                   errorMessage={errors.ubicacion?.message}
                 />
               )}
@@ -107,16 +107,19 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
               )}
             />
             {submitError ? (
-              <p className="text-sm text-[#ff8a80] w-full text-left">
+              <p
+                role="alert"
+                className="w-full text-left text-sm text-[#ff8a80]"
+              >
                 {submitError}
               </p>
             ) : null}
-            <div className="flex justify-between w-full">
+            <div className="flex w-full justify-between gap-3">
               <Button
                 variant="bordered"
                 radius="full"
                 className="border border-[#F8B519] text-[#F8B519] hover:bg-[#F8B519] hover:text-[#0F0F0F]"
-                onClick={handleClose}
+                onPress={handleClose}
                 type="button"
               >
                 Cancelar
@@ -126,9 +129,9 @@ function AddEquipoModal({ visible, setVisible }: AddEquipoModalProps) {
                 variant="solid"
                 type="submit"
                 isLoading={loading}
-                className="bg-[#F8B519] hover:bg-[#F8B519] text-[#ffffff] font-bold text-[16px]"
+                className="bg-[#F8B519] text-[16px] font-bold text-[#0F0F0F] hover:bg-[#F8B519]"
               >
-                {loading ? "Cargando..." : "Agregar"}
+                {loading ? "Guardando…" : "Agregar"}
               </Button>
             </div>
           </form>

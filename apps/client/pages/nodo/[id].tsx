@@ -3,23 +3,14 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { Button, Card, CardBody, Chip } from "@heroui/react";
 import Layout from "../../components/Layout";
+import AlertBanner from "../../components/monitoring/AlertBanner";
+import EmptyState from "../../components/monitoring/EmptyState";
+import LoadingState from "../../components/monitoring/LoadingState";
 import StatusBadge from "../../components/monitoring/StatusBadge";
 import SensorValue from "../../components/monitoring/SensorValue";
 import SensorSelector from "../../components/node-detail/SensorSelector";
 import HistoricalTable from "../../components/node-detail/HistoricalTable";
 import OutOfRangeList from "../../components/node-detail/OutOfRangeList";
-
-const SensorHistoryChart = dynamic(
-  () => import("../../components/node-detail/SensorHistoryChart"),
-  {
-    ssr: false,
-    loading: () => (
-      <p className="text-[#888888] text-sm rounded-2xl border border-dashed border-[#333333] p-6 text-center">
-        Cargando gráfica…
-      </p>
-    ),
-  },
-);
 import { getEquipos } from "../../services/equipos";
 import {
   getHistoricoEquipo,
@@ -44,6 +35,16 @@ import {
   hasFueraDeRango,
   SENSOR_LABELS,
 } from "../../utils/monitoreoStatus";
+
+const SensorHistoryChart = dynamic(
+  () => import("../../components/node-detail/SensorHistoryChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <LoadingState message="Cargando gráfica…" />
+    ),
+  },
+);
 
 function NodeDetailPage() {
   const router = useRouter();
@@ -83,7 +84,9 @@ function NodeDetailPage() {
         .catch(() => {
           if (cancelled) return;
           setEquipo(null);
-          setEquiposError("No se pudo cargar el catálogo de equipos.");
+          setEquiposError(
+            "No se pudo cargar el catálogo de equipos. Verifica la conexión con el servidor.",
+          );
         });
 
       const monitoreoPromise = getMonitoreoActual()
@@ -94,7 +97,9 @@ function NodeDetailPage() {
         .catch(() => {
           if (cancelled) return;
           setLectura(null);
-          setMonitoreoError("No se pudo cargar la lectura actual.");
+          setMonitoreoError(
+            "No se pudo cargar la lectura actual. Verifica la conexión con el servidor.",
+          );
         });
 
       const historicoPromise = getHistoricoEquipo(nodeId)
@@ -109,7 +114,7 @@ function NodeDetailPage() {
           if (cancelled) return;
           setHistorico([]);
           setHistoricoError(
-            "Histórico temporalmente no disponible.",
+            "No se pudo cargar el histórico. Verifica la conexión con el servidor.",
           );
         });
 
@@ -146,7 +151,7 @@ function NodeDetailPage() {
   if (!router.isReady || !nodeId) {
     return (
       <Layout title="Detalle de nodo">
-        <p className="text-[#aaaaaa]">Cargando nodo…</p>
+        <LoadingState message="Cargando nodo…" />
       </Layout>
     );
   }
@@ -154,101 +159,121 @@ function NodeDetailPage() {
   return (
     <Layout title={`Nodo ${nodeId}`}>
       <div className="flex flex-col gap-6 pb-10">
-        <div className="flex flex-wrap items-center gap-3">
+        <div>
           <Button
             variant="bordered"
             radius="full"
-            className="border-[#333333] text-white"
+            className="border-[#333333] text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F8B519]"
+            aria-label="Volver al monitoreo"
             onPress={() => router.push("/")}
           >
             ← Volver al monitoreo
           </Button>
         </div>
 
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <h1 className="text-[28px] md:text-[36px] font-bold break-all">
+        <header className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wide text-[#888888]">
+              Nodo
+            </p>
+            <h1 className="break-all text-[26px] font-bold md:text-[36px]">
               {nodeId}
             </h1>
             {equipo ? (
-              <div className="mt-2 text-[#aaaaaa] text-sm md:text-base">
+              <div className="mt-2 text-sm text-[#aaaaaa] md:text-base">
                 <p>
                   Ubicación:{" "}
-                  {equipo.ubicacion?.trim() ? equipo.ubicacion : "N/D"}
+                  {equipo.ubicacion?.trim()
+                    ? equipo.ubicacion
+                    : "No disponible"}
                 </p>
                 <p>
-                  Altura: {equipo.altura?.trim() ? equipo.altura : "N/D"}
+                  Altura:{" "}
+                  {equipo.altura?.trim() ? equipo.altura : "No disponible"}
                 </p>
               </div>
             ) : (
-              <p className="mt-2 text-[#888888] text-sm">
-                Nodo no registrado
-              </p>
+              <p className="mt-2 text-sm text-[#888888]">Nodo no registrado</p>
             )}
           </div>
           <StatusBadge status={status} />
-        </div>
+        </header>
 
         {equiposError ? (
-          <div className="rounded-2xl border border-[#F8B519]/40 bg-[#F8B519]/10 px-4 py-3 text-[#F8B519] text-sm">
-            {equiposError}
-          </div>
+          <AlertBanner tone="warning">{equiposError}</AlertBanner>
         ) : null}
 
         {initialLoading ? (
-          <p className="text-[#aaaaaa]">Cargando detalle del nodo…</p>
+          <LoadingState message="Cargando detalle del nodo…" />
         ) : null}
 
         {!initialLoading && notFound ? (
-          <Card className="bg-[#171717] rounded-3xl">
-            <CardBody className="p-8 text-center text-[#cccccc] gap-4">
-              <p>
-                No se encontró información para el nodo{" "}
-                <span className="font-semibold text-white">{nodeId}</span>.
-              </p>
-              <Button
-                radius="full"
-                className="bg-[#F8B519] text-[#0F0F0F] font-semibold self-center"
-                onPress={() => router.push("/")}
-              >
-                Volver al monitoreo
-              </Button>
-            </CardBody>
-          </Card>
+          <EmptyState
+            title="Nodo no encontrado"
+            description={`No se encontró información para el nodo ${nodeId}.`}
+          />
+        ) : null}
+
+        {!initialLoading && notFound ? (
+          <div className="flex justify-center">
+            <Button
+              radius="full"
+              className="bg-[#F8B519] font-semibold text-[#0F0F0F]"
+              onPress={() => router.push("/")}
+            >
+              Volver al monitoreo
+            </Button>
+          </div>
         ) : null}
 
         {!initialLoading && !notFound ? (
           <>
-            <Card className="bg-[#171717] rounded-3xl">
-              <CardBody className="p-6 flex flex-col gap-4 text-white">
-                <h2 className="text-[20px] font-bold">Estado actual</h2>
-                {monitoreoError ? (
-                  <p className="text-[#F8B519] text-sm">{monitoreoError}</p>
-                ) : null}
-                <ul className="list-disc list-inside text-sm text-[#cccccc] space-y-1">
-                  {reasons.map((reason) => (
-                    <li key={reason}>{reason}</li>
-                  ))}
-                </ul>
-                <div className="flex flex-wrap gap-2">
-                  {viaLabel ? (
-                    <Chip className="bg-[#222222] text-[#dddddd]">{viaLabel}</Chip>
-                  ) : (
-                    <Chip className="bg-[#222222] text-[#dddddd]">Vía: N/D</Chip>
-                  )}
-                  {fueraDeRangoActivo ? (
-                    <Chip className="bg-[#821600] text-white">
-                      Fuera de rango: {lectura?.fueraDeRango}
-                    </Chip>
+            <section aria-labelledby="estado-actual-title">
+              <Card className="rounded-3xl border border-[#2a2a2a] bg-[#171717]">
+                <CardBody className="flex flex-col gap-4 p-5 text-white md:p-6">
+                  <h2
+                    id="estado-actual-title"
+                    className="text-[20px] font-bold"
+                  >
+                    Estado
+                  </h2>
+                  {monitoreoError ? (
+                    <AlertBanner tone="warning">{monitoreoError}</AlertBanner>
                   ) : null}
-                </div>
-              </CardBody>
-            </Card>
+                  <ul className="list-inside list-disc space-y-1 text-sm text-[#cccccc]">
+                    {reasons.map((reason) => (
+                      <li key={reason}>{reason}</li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-wrap gap-2">
+                    {viaLabel ? (
+                      <Chip className="bg-[#222222] text-[#dddddd]">
+                        {viaLabel}
+                      </Chip>
+                    ) : (
+                      <Chip className="bg-[#222222] text-[#888888]">
+                        Vía: No disponible
+                      </Chip>
+                    )}
+                    {fueraDeRangoActivo ? (
+                      <Chip className="bg-[#821600] text-white">
+                        Fuera de rango: {lectura?.fueraDeRango}
+                      </Chip>
+                    ) : null}
+                  </div>
+                </CardBody>
+              </Card>
+            </section>
 
-            <section className="flex flex-col gap-3">
-              <h2 className="text-[20px] font-bold">Lectura actual</h2>
+            <section
+              className="flex flex-col gap-3"
+              aria-labelledby="lectura-actual-title"
+            >
+              <h2 id="lectura-actual-title" className="text-[20px] font-bold">
+                Lectura actual
+              </h2>
               {lectura ? (
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                   <SensorValue
                     sensor="mq2"
                     value={lectura.mq2}
@@ -271,25 +296,33 @@ function NodeDetailPage() {
                   />
                 </div>
               ) : (
-                <p className="text-[#888888] text-sm">Sin datos</p>
+                <EmptyState
+                  title="Sin datos"
+                  description="Este nodo no tiene lectura de monitoreo disponible."
+                />
               )}
             </section>
 
-            <section className="flex flex-col gap-4">
-              <h2 className="text-[20px] font-bold">Sensor</h2>
+            <section
+              className="flex flex-col gap-4"
+              aria-labelledby="sensor-title"
+            >
+              <h2 id="sensor-title" className="text-[20px] font-bold">
+                Sensor seleccionado
+              </h2>
               <SensorSelector
                 selected={selectedSensor}
                 onSelect={setSelectedSensor}
               />
-              <Card className="bg-[#171717] rounded-3xl">
-                <CardBody className="p-5 text-white gap-2">
+              <Card className="rounded-3xl border border-[#2a2a2a] bg-[#171717]">
+                <CardBody className="gap-2 p-5 text-white">
                   <p className="text-lg font-semibold">
                     {sensorMeta.name} · {sensorMeta.gas}
                   </p>
                   <p className="text-[28px] font-bold">
                     {lectura
                       ? `${lectura[selectedSensor].toFixed(1)} ppm`
-                      : "N/D"}
+                      : "No disponible"}
                   </p>
                   <p className="text-sm text-[#aaaaaa]">
                     Estado del sensor:{" "}
@@ -304,17 +337,22 @@ function NodeDetailPage() {
               </Card>
             </section>
 
-            <section className="flex flex-col gap-3">
+            <section
+              className="flex flex-col gap-3"
+              aria-labelledby="grafica-title"
+            >
               <div className="flex flex-wrap items-end justify-between gap-2">
-                <h2 className="text-[20px] font-bold">Gráfica histórica</h2>
+                <h2 id="grafica-title" className="text-[20px] font-bold">
+                  Gráfica
+                </h2>
                 <p className="text-xs text-[#666666]">
                   Eje X: marca del dispositivo (ms), no fecha/hora absoluta.
                 </p>
               </div>
               {historicoError ? (
-                <div className="rounded-2xl border border-[#F8B519]/40 bg-[#F8B519]/10 px-4 py-3 text-[#F8B519] text-sm">
-                  No se puede graficar: {historicoError}
-                </div>
+                <AlertBanner tone="warning">
+                  No se puede graficar. {historicoError}
+                </AlertBanner>
               ) : (
                 <SensorHistoryChart
                   sensor={selectedSensor}
@@ -323,18 +361,22 @@ function NodeDetailPage() {
               )}
             </section>
 
-            <section className="flex flex-col gap-3">
+            <section
+              className="flex flex-col gap-3"
+              aria-labelledby="historico-title"
+            >
               <div className="flex flex-wrap items-end justify-between gap-2">
-                <h2 className="text-[20px] font-bold">Histórico disponible</h2>
+                <h2 id="historico-title" className="text-[20px] font-bold">
+                  Histórico
+                </h2>
                 <p className="text-xs text-[#666666]">
-                  Ordenado por marca del dispositivo (más reciente primero). No
-                  representa fecha/hora absoluta.
+                  Ordenado por marca del dispositivo (más reciente primero).
                 </p>
               </div>
               {historicoError ? (
-                <div className="rounded-2xl border border-[#F8B519]/40 bg-[#F8B519]/10 px-4 py-3 text-[#F8B519] text-sm">
-                  Información actual disponible. {historicoError}
-                </div>
+                <AlertBanner tone="warning">
+                  Lectura actual disponible. {historicoError}
+                </AlertBanner>
               ) : (
                 <HistoricalTable
                   sensor={selectedSensor}
@@ -343,14 +385,17 @@ function NodeDetailPage() {
               )}
             </section>
 
-            <section className="flex flex-col gap-3">
-              <h2 className="text-[20px] font-bold">
-                Lecturas fuera de rango
+            <section
+              className="flex flex-col gap-3"
+              aria-labelledby="fuera-rango-title"
+            >
+              <h2 id="fuera-rango-title" className="text-[20px] font-bold">
+                Fuera de rango
               </h2>
               {historicoError ? (
-                <p className="text-[#888888] text-sm">
+                <AlertBanner tone="info">
                   No se puede listar fuera de rango sin histórico.
-                </p>
+                </AlertBanner>
               ) : (
                 <OutOfRangeList entries={fueraDeRangoEntries} />
               )}

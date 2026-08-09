@@ -31,9 +31,10 @@ export default function SensorSelector({
             variant={isActive ? "solid" : "bordered"}
             className={
               isActive
-                ? "bg-[#F8B519] text-[#0F0F0F] font-semibold"
-                : "border-[#333333] text-[#dddddd]"
+                ? "bg-[#F8B519] font-semibold text-[#0F0F0F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F8B519]"
+                : "border-[#333333] text-[#dddddd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F8B519]"
             }
+            aria-label={`Sensor ${label.name} (${label.gas})`}
             onPress={() => onSelect(sensor)}
           >
             {label.name}

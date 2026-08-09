@@ -33,7 +33,7 @@ export default function SensorHistoryChart({
     const y = ordered.map((e) => e.record[sensor]);
     // [via, fueraDeRango] for Plotly hovertemplate %{customdata[n]}
     const customdata = ordered.map((e) => [
-      e.record.via ?? "N/D",
+      e.record.via ?? "No disponible",
       e.record.fueraDeRango?.trim() ? e.record.fueraDeRango : "—",
     ]);
 
@@ -46,9 +46,12 @@ export default function SensorHistoryChart({
 
   if (entries.length === 0) {
     return (
-      <p className="text-[#888888] text-sm rounded-2xl border border-dashed border-[#333333] p-6 text-center">
-        No hay datos históricos para graficar.
-      </p>
+      <div className="rounded-2xl border border-dashed border-[#333333] bg-[#171717] px-6 py-8 text-center">
+        <p className="text-sm font-semibold text-white">Gráfica sin datos</p>
+        <p className="mt-1 text-sm text-[#888888]">
+          No hay datos históricos para graficar.
+        </p>
+      </div>
     );
   }
 
@@ -79,7 +82,7 @@ export default function SensorHistoryChart({
       x: chartModel.outOfRange.map((e) => e.record.timestamp),
       y: chartModel.outOfRange.map((e) => e.record[sensor]),
       customdata: chartModel.outOfRange.map((e) => [
-        e.record.via ?? "N/D",
+        e.record.via ?? "No disponible",
         e.record.fueraDeRango ?? "—",
       ]),
       marker: {
@@ -126,11 +129,11 @@ export default function SensorHistoryChart({
     paper_bgcolor: "#171717",
     plot_bgcolor: "#121212",
     font: { color: "#dddddd", size: 12 },
-    margin: { l: 56, r: 24, t: 36, b: 56 },
+    margin: { l: 56, r: 16, t: 48, b: 64 },
     legend: {
       orientation: "h",
       yanchor: "bottom",
-      y: 1.02,
+      y: 1.08,
       x: 0,
       font: { size: 11 },
     },
@@ -162,7 +165,7 @@ export default function SensorHistoryChart({
   };
 
   return (
-    <div className="w-full rounded-2xl border border-[#333333] bg-[#171717] p-2 overflow-hidden">
+    <div className="w-full overflow-hidden rounded-2xl border border-[#333333] bg-[#171717] p-2 md:p-3">
       {sensor === "mq3" ? (
         <p className="px-3 pt-2 text-xs text-[#888888]">
           Sensor informativo: sin umbral de semáforo definido.
@@ -173,7 +176,7 @@ export default function SensorHistoryChart({
         layout={layout}
         config={config}
         useResizeHandler
-        style={{ width: "100%", height: "360px" }}
+        style={{ width: "100%", height: "min(420px, 55vh)" }}
         className="w-full"
       />
     </div>

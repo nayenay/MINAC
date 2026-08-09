@@ -14,9 +14,14 @@ interface StatusBadgeProps {
 }
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
+  const label = NODE_STATUS_LABELS[status];
+
   return (
-    <Chip className={`${STATUS_STYLES[status]} font-semibold`}>
-      {NODE_STATUS_LABELS[status]}
+    <Chip
+      className={`${STATUS_STYLES[status]} font-semibold`}
+      aria-label={`Estado: ${label}`}
+    >
+      {label}
     </Chip>
   );
 }

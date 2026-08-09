@@ -1,6 +1,6 @@
 import { Button, Card, CardBody, Chip } from "@heroui/react";
 import { useRouter } from "next/router";
-import type { DashboardNode } from "../../types/monitoreo";
+import type { DashboardNode, NodeStatus } from "../../types/monitoreo";
 import {
   formatViaLabel,
   getNodeStatus,
@@ -13,38 +13,46 @@ interface MonitoringCardProps {
   node: DashboardNode;
 }
 
+const STATUS_EDGE: Record<NodeStatus, string> = {
+  normal: "border-l-[#00824F]",
+  advertencia: "border-l-[#F8B519]",
+  peligro: "border-l-[#821600]",
+  sin_datos: "border-l-[#555555]",
+};
+
 export default function MonitoringCard({ node }: MonitoringCardProps) {
   const router = useRouter();
   const { equipo, lectura } = node;
   const status = getNodeStatus(lectura);
   const viaLabel = formatViaLabel(lectura?.via, lectura?.retransmitidoPor);
   const fueraDeRangoActivo = hasFueraDeRango(lectura?.fueraDeRango);
+  const ubicacion = equipo?.ubicacion?.trim() || "No disponible";
+  const altura = equipo?.altura?.trim() || "No disponible";
 
   return (
     <Card
       shadow="lg"
       radius="lg"
-      className="bg-[#171717] rounded-3xl shadow-xl"
+      className={`rounded-3xl border border-[#2a2a2a] border-l-4 bg-[#171717] shadow-xl ${STATUS_EDGE[status]}`}
     >
-      <CardBody className="text-white p-6 flex flex-col gap-4">
+      <CardBody className="flex flex-col gap-4 p-5 text-white md:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex flex-col gap-1 min-w-0">
-            <h2 className="text-[24px] md:text-[28px] font-bold break-all">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-xs font-medium uppercase tracking-wide text-[#888888]">
+              Nodo
+            </p>
+            <h2 className="break-all text-[22px] font-bold md:text-[26px]">
               {node.id}
             </h2>
             {equipo ? (
               <>
                 <p className="text-[14px] text-[#aaaaaa]">
-                  Ubicación: {equipo.ubicacion?.trim() ? equipo.ubicacion : "—"}
+                  Ubicación: {ubicacion}
                 </p>
-                <p className="text-[14px] text-[#aaaaaa]">
-                  Altura: {equipo.altura?.trim() ? equipo.altura : "—"}
-                </p>
+                <p className="text-[14px] text-[#aaaaaa]">Altura: {altura}</p>
               </>
             ) : (
-              <p className="text-[13px] text-[#888888]">
-                Sin registro en catálogo (ubicacion/altura no disponibles)
-              </p>
+              <p className="text-[13px] text-[#888888]">Nodo no registrado</p>
             )}
           </div>
           <StatusBadge status={status} />
@@ -52,12 +60,16 @@ export default function MonitoringCard({ node }: MonitoringCardProps) {
 
         <div className="flex flex-wrap gap-2">
           {viaLabel ? (
-            <Chip className="bg-[#222222] text-[#dddddd] text-[12px]">
+            <Chip className="bg-[#222222] text-[12px] text-[#dddddd]">
               {viaLabel}
             </Chip>
-          ) : null}
+          ) : (
+            <Chip className="bg-[#222222] text-[12px] text-[#888888]">
+              Vía: No disponible
+            </Chip>
+          )}
           {fueraDeRangoActivo ? (
-            <Chip className="bg-[#821600] text-white text-[12px]">
+            <Chip className="bg-[#821600] text-[12px] text-white">
               Fuera de rango: {lectura?.fueraDeRango}
             </Chip>
           ) : null}
@@ -87,7 +99,7 @@ export default function MonitoringCard({ node }: MonitoringCardProps) {
             />
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-[#333333] p-6 text-center text-[#888888]">
+          <div className="rounded-2xl border border-dashed border-[#333333] p-6 text-center text-sm text-[#888888]">
             Sin datos
           </div>
         )}
@@ -96,7 +108,8 @@ export default function MonitoringCard({ node }: MonitoringCardProps) {
           <Button
             radius="full"
             variant="bordered"
-            className="border-[#F8B519] text-[#F8B519]"
+            className="border-[#F8B519] text-[#F8B519] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F8B519]"
+            aria-label={`Ver detalle del nodo ${node.id}`}
             onPress={() =>
               router.push(`/nodo/${encodeURIComponent(node.id)}`)
             }
