@@ -91,3 +91,47 @@ export const NODE_STATUS_LABELS: Record<NodeStatus, string> = {
   peligro: "Peligro",
   sin_datos: "Sin datos",
 };
+
+export const SENSOR_ALERT_LABELS: Record<SensorAlertLevel, string> = {
+  normal: "Normal",
+  advertencia: "Advertencia",
+  peligro: "Peligro",
+};
+
+/** Causas textuales del estado general (sin diagnósticos humanos). */
+export function getNodeStatusReasons(
+  lectura: MonitoreoRecord | null | undefined,
+): string[] {
+  if (!lectura) return ["Sin lectura disponible"];
+
+  const reasons: string[] = [];
+
+  if (hasFueraDeRango(lectura.fueraDeRango)) {
+    reasons.push(`Lectura fuera de rango: ${lectura.fueraDeRango}`);
+  }
+
+  for (const sensor of SEMAPHORE_SENSORS) {
+    const level = getSensorStatus(sensor, lectura[sensor]);
+    const name = SENSOR_LABELS[sensor].name;
+    if (level === "peligro") {
+      reasons.push(`${name} alcanza nivel de peligro`);
+    } else if (level === "advertencia") {
+      reasons.push(`${name} supera nivel de advertencia`);
+    }
+  }
+
+  if (reasons.length === 0) {
+    return ["Sensores participantes dentro de umbral seguro"];
+  }
+
+  return reasons;
+}
+
+/** Estado de un sensor individual para UI de detalle/histórico. */
+export function getSensorStatusLabel(
+  sensor: SensorKey,
+  value: number,
+): string {
+  if (sensor === "mq3") return "Informativo";
+  return SENSOR_ALERT_LABELS[getSensorStatus(sensor, value)];
+}

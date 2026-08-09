@@ -1,4 +1,5 @@
-import { Card, CardBody, Chip } from "@heroui/react";
+import { Button, Card, CardBody, Chip } from "@heroui/react";
+import { useRouter } from "next/router";
 import type { DashboardNode } from "../../types/monitoreo";
 import {
   formatViaLabel,
@@ -13,6 +14,7 @@ interface MonitoringCardProps {
 }
 
 export default function MonitoringCard({ node }: MonitoringCardProps) {
+  const router = useRouter();
   const { equipo, lectura } = node;
   const status = getNodeStatus(lectura);
   const viaLabel = formatViaLabel(lectura?.via, lectura?.retransmitidoPor);
@@ -89,6 +91,19 @@ export default function MonitoringCard({ node }: MonitoringCardProps) {
             Sin datos
           </div>
         )}
+
+        <div className="flex justify-end">
+          <Button
+            radius="full"
+            variant="bordered"
+            className="border-[#F8B519] text-[#F8B519]"
+            onPress={() =>
+              router.push(`/nodo/${encodeURIComponent(node.id)}`)
+            }
+          >
+            Ver detalle
+          </Button>
+        </div>
       </CardBody>
     </Card>
   );
