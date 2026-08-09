@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/router";
 import { Button, Card, CardBody, Chip } from "@heroui/react";
 import Layout from "../../components/Layout";
@@ -7,6 +8,18 @@ import SensorValue from "../../components/monitoring/SensorValue";
 import SensorSelector from "../../components/node-detail/SensorSelector";
 import HistoricalTable from "../../components/node-detail/HistoricalTable";
 import OutOfRangeList from "../../components/node-detail/OutOfRangeList";
+
+const SensorHistoryChart = dynamic(
+  () => import("../../components/node-detail/SensorHistoryChart"),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="text-[#888888] text-sm rounded-2xl border border-dashed border-[#333333] p-6 text-center">
+        Cargando gráfica…
+      </p>
+    ),
+  },
+);
 import { getEquipos } from "../../services/equipos";
 import {
   getHistoricoEquipo,
@@ -289,6 +302,25 @@ function NodeDetailPage() {
                   </p>
                 </CardBody>
               </Card>
+            </section>
+
+            <section className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <h2 className="text-[20px] font-bold">Gráfica histórica</h2>
+                <p className="text-xs text-[#666666]">
+                  Eje X: marca del dispositivo (ms), no fecha/hora absoluta.
+                </p>
+              </div>
+              {historicoError ? (
+                <div className="rounded-2xl border border-[#F8B519]/40 bg-[#F8B519]/10 px-4 py-3 text-[#F8B519] text-sm">
+                  No se puede graficar: {historicoError}
+                </div>
+              ) : (
+                <SensorHistoryChart
+                  sensor={selectedSensor}
+                  entries={historico}
+                />
+              )}
             </section>
 
             <section className="flex flex-col gap-3">
