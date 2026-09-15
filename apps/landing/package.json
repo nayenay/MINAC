@@ -1,5 +1,5 @@
 {
-  "name": "client",
+  "name": "landing",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,15 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@heroui/react": "^2.8.4",
+    "@hookform/resolvers": "^3.9.1",
     "@tabler/icons-react": "^3.34.1",
-    "axios": "^1.12.0",
-    "framer-motion": "^12.23.12",
-    "next": "15.5.2",
+    "next": "15.5.25",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
-    "react-pro-sidebar": "^1.1.0",
     "yup": "^1.7.0"
   },
   "devDependencies": {
@@ -27,7 +24,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.2",
+    "eslint-config-next": "15.5.25",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
