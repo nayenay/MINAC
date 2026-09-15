@@ -19,8 +19,8 @@
 // ============================================================
 // >>> CONFIGURAR ANTES DE SUBIR <<<
 #define NODO_ID 2
-const char* WIFI_SSID     = "HolaCafecitoColinas";
-const char* WIFI_PASSWORD = "HolaColinas";
+const char* WIFI_SSID     = "Mega-2.4G-2FAD";
+const char* WIFI_PASSWORD = "nXBSaB2QfT";
 const char* API_URL       = "https://minac-production-9424.up.railway.app/monitoreo";
 // ============================================================
 
