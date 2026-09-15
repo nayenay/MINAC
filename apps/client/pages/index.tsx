@@ -1,88 +1,74 @@
 import React from "react";
-import { Button, Card, CardBody, Chip } from "@heroui/react";
 import Layout from "../components/Layout";
-import { IconTemperature, IconCarFan } from "@tabler/icons-react";
+import AlertBanner from "../components/monitoring/AlertBanner";
+import EmptyState from "../components/monitoring/EmptyState";
+import LoadingState from "../components/monitoring/LoadingState";
+import MonitoringCard from "../components/monitoring/MonitoringCard";
+import { useDashboardData } from "../hooks/useDashboardData";
 
 function HomePage() {
-  const monitoreos = [
-    {
-      idEquipo: "EQM-001",
-      gas: "50 ppm",
-      temperatura: "25°C",
-    },
-    {
-      idEquipo: "EQM-002",
-      gas: "40 ppm",
-      temperatura: "25°C",
-    },
-    {
-      idEquipo: "EQM-003",
-      gas: "30 ppm",
-      temperatura: "25°C",
-    },
-  ];
+  const {
+    nodes,
+    initialLoading,
+    equiposError,
+    monitoreoError,
+    refreshWarning,
+  } = useDashboardData();
 
-  const setStatus = (gas: string) => {
-    if (gas === "50 ppm") {
-      return "No seguro";
-    } else if (gas === "40 ppm") {
-      return "Poco seguro";
-    } else {
-      return "Seguro";
-    }
-  };
+  const showBlockingError =
+    !initialLoading && monitoreoError !== null && nodes.length === 0;
 
   return (
-    <Layout title="Home">
-      <h1 className="text-[40px] font-bold">Monitoreo</h1>
-      <div className="grid grid-cols-2 gap-4">
-        {monitoreos.map((monitoreo) => (
-          <Card
-            shadow="lg"
-            radius="lg"
-            className="bg-[#171717] rounded-3xl shadow-xl"
-            key={monitoreo.idEquipo}
-          >
-            <CardBody className="text-white p-7 flex flex-col gap-4">
-              <h2 className="text-[28px] font-bold">{monitoreo.idEquipo}</h2>
-              <Chip
-                className={`${
-                  setStatus(monitoreo.gas) == "No seguro"
-                    ? "bg-[#821600]"
-                    : setStatus(monitoreo.gas) == "Poco seguro"
-                    ? "bg-[#F8B519]"
-                    : "bg-[#00824F]"
-                } text-white`}
-              >
-                {setStatus(monitoreo.gas)}
-              </Chip>
-              <div className="flex justify-between gap-4">
-                <Card
-                  className="border border-[#333333] rounded-3xl bg-[#171717]"
-                  style={{ width: "200px", height: "140px" }}
-                >
-                  <CardBody className="p-4 flex justify-around gap-4">
-                    <div className="flex justify-around items-center">
-                      <IconTemperature size={52}/>
-                      <p className="text-[32px] font-bold">{monitoreo.temperatura}</p>
-                    </div>
-                  </CardBody>
-                </Card>
-                <Card
-                  className="border border-[#333333] rounded-3xl bg-[#171717]"
-                  style={{ width: "200px", height: "140px" }}
-                >
-                  <CardBody className="p-4 flex justify-around gap-4">
-                    <div className="flex justify-around items-center">
-                      <IconCarFan size={52} />
-                      <p className="text-[32px] font-bold">{monitoreo.gas}</p>
-                    </div>
-                  </CardBody>
-                </Card>
-              </div>
-            </CardBody>
-          </Card>
-        ))}
+    <Layout title="MINAC - Monitoreo">
+      <div className="flex flex-col gap-5 pb-8">
+        <header className="flex flex-col gap-2">
+          <h1 className="text-[26px] font-bold leading-tight md:text-[36px]">
+            MINAC - Monitoreo en tiempo real
+          </h1>
+          <p className="max-w-2xl text-sm text-[#888888] md:text-base">
+            Lecturas actuales de los nodos ESP32. El detalle histórico está en
+            cada nodo.
+          </p>
+          {!initialLoading && nodes.length > 0 ? (
+            <p className="text-xs text-[#666666]">
+              {nodes.length} nodo{nodes.length === 1 ? "" : "s"} en vista
+            </p>
+          ) : null}
+        </header>
+
+        {equiposError ? (
+          <AlertBanner tone="warning">{equiposError}</AlertBanner>
+        ) : null}
+
+        {refreshWarning ? (
+          <AlertBanner tone="warning">{refreshWarning}</AlertBanner>
+        ) : null}
+
+        {initialLoading ? (
+          <LoadingState message="Cargando monitoreo…" />
+        ) : null}
+
+        {!initialLoading && showBlockingError ? (
+          <EmptyState
+            title="No se pudo cargar el monitoreo"
+            description="Verifica la conexión con el servidor y que NEXT_PUBLIC_BACKEND_URL esté configurada."
+          />
+        ) : null}
+
+        {!initialLoading && !showBlockingError && nodes.length === 0 ? (
+          <EmptyState
+            title="Sin nodos para mostrar"
+            description="No hay equipos registrados ni lecturas de monitoreo. Agrega un equipo o espera datos de los nodos ESP32."
+          />
+        ) : null}
+
+        {!initialLoading && !showBlockingError && nodes.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            {nodes.map((node) => (
+              <MonitoringCard key={node.id} node={node} />
+            ))}
+          </div>
+        ) : null}
       </div>
     </Layout>
   );
