@@ -1,10 +1,15 @@
 import { ImageResponse } from "next/og";
+import fs from "fs";
+import path from "path";
 
-export const runtime = "edge";
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
 
 export default function Icon() {
+  const imagePath = path.join(process.cwd(), "public", "icono_minac.png");
+  const imageBuffer = fs.readFileSync(imagePath);
+  const base64Image = `data:image/png;base64,${imageBuffer.toString("base64")}`;
+
   return new ImageResponse(
     (
       <div
@@ -14,15 +19,11 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#ffffff",
-          border: "2px solid #171412",
-          borderRadius: 4,
+          backgroundColor: "transparent",
         }}
       >
-        <svg width="20" height="20" viewBox="0 0 40 40" fill="none">
-          <path d="M2 6 L20 20 L2 34" stroke="#f2a302" strokeWidth="8" strokeLinecap="square" />
-          <path d="M18 6 L36 20 L18 34" stroke="#f2a302" strokeWidth="8" strokeLinecap="square" />
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={base64Image} alt="MINAC" width={20} height={20} />
       </div>
     ),
     { ...size }

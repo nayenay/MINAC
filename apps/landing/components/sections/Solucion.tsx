@@ -1,9 +1,18 @@
-import { IconFlask2, IconRadio, IconGauge, IconShieldCheck, IconBattery3, IconMapPin, IconFileCheck } from "@tabler/icons-react";
+import {
+  IconFlask2,
+  IconRadio,
+  IconGauge,
+  IconShieldCheck,
+  IconBattery3,
+  IconMapPin,
+  IconFileCheck,
+} from "@tabler/icons-react";
 import Container from "@/components/ui/Container";
 import Card from "@/components/ui/Card";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ProductPhotoPlaceholder from "@/components/ui/ProductPhotoPlaceholder";
 import SystemArchitectureIllustration from "@/components/illustrations/SystemArchitectureIllustration";
+import Image from "next/image";
 
 const layers = [
   {
@@ -28,7 +37,10 @@ const layers = [
 
 export default function Solucion() {
   return (
-    <section id="solucion" className="border-b border-border bg-bg-subtle py-16 md:py-24">
+    <section
+      id="solucion"
+      className="border-b border-border bg-bg-subtle py-16 md:py-24"
+    >
       <Container className="flex flex-col gap-14">
         <SectionHeading
           eyebrow="La solución"
@@ -39,9 +51,17 @@ export default function Solucion() {
         <div className="grid gap-6 lg:grid-cols-3">
           {layers.map((layer) => (
             <Card key={layer.title} className="flex flex-col gap-4 p-6">
-              <layer.icon size={28} className="text-accent-strong" stroke={1.75} />
-              <h3 className="font-heading text-lg font-bold text-text-primary">{layer.title}</h3>
-              <p className="text-sm leading-relaxed text-text-secondary">{layer.description}</p>
+              <layer.icon
+                size={28}
+                className="text-accent-strong"
+                stroke={1.75}
+              />
+              <h3 className="font-heading text-lg font-bold text-text-primary">
+                {layer.title}
+              </h3>
+              <p className="text-sm leading-relaxed text-text-secondary">
+                {layer.description}
+              </p>
             </Card>
           ))}
         </div>
@@ -60,31 +80,52 @@ export default function Solucion() {
             </h3>
             <ul className="flex flex-col gap-3 text-sm text-text-secondary">
               <li className="flex items-start gap-3">
-                <IconShieldCheck size={18} className="mt-0.5 shrink-0 text-accent-strong" stroke={1.75} />
-                Carcasa en Policarbonato con Disipación Electrostática (PC-ESD), con protección IP67, diseñada
-                para atmósferas Clase I División 1.
+                <IconShieldCheck
+                  size={18}
+                  className="mt-0.5 shrink-0 text-accent-strong"
+                  stroke={1.75}
+                />
+                Carcasa en Policarbonato con Disipación Electrostática (PC-ESD),
+                con protección IP67, diseñada para atmósferas Clase I División
+                1.
               </li>
               <li className="flex items-start gap-3">
-                <IconGauge size={18} className="mt-0.5 shrink-0 text-accent-strong" stroke={1.75} />
-                Semáforo visual de 3 LEDs en cada dispositivo: indica el estado localmente, sin depender solo del
-                dashboard.
+                <IconGauge
+                  size={18}
+                  className="mt-0.5 shrink-0 text-accent-strong"
+                  stroke={1.75}
+                />
+                Semáforo visual de 3 LEDs en cada dispositivo: indica el estado
+                localmente, sin depender solo del dashboard.
               </li>
               <li className="flex items-start gap-3">
-                <IconBattery3 size={18} className="mt-0.5 shrink-0 text-accent-strong" stroke={1.75} />
-                Diseño con autonomía de batería, pensado para seguir operando incluso ante un corte de energía.
+                <IconBattery3
+                  size={18}
+                  className="mt-0.5 shrink-0 text-accent-strong"
+                  stroke={1.75}
+                />
+                Diseño con autonomía de batería, pensado para seguir operando
+                incluso ante un corte de energía.
               </li>
               <li className="flex items-start gap-3">
-                <IconFileCheck size={18} className="mt-0.5 shrink-0 text-accent-strong" stroke={1.75} />
-                Datos centralizados en Plataforma COM para respaldar reportes de cumplimiento normativo.
+                <IconFileCheck
+                  size={18}
+                  className="mt-0.5 shrink-0 text-accent-strong"
+                  stroke={1.75}
+                />
+                Datos centralizados en Plataforma COM para respaldar reportes de
+                cumplimiento normativo.
               </li>
             </ul>
           </div>
           <div className="flex items-center justify-center">
             {/* TODO: reemplazar con fotografía real mostrando el semáforo de 3 LEDs,
                 la etiqueta EX amarilla y la antena del dispositivo */}
-            <ProductPhotoPlaceholder
-              label="Fotografía real del Centinela Minero con detalle de semáforo, antena y etiqueta EX (pendiente)"
-              className="w-full max-w-xs"
+            <Image
+              src="/centinela-minero2.jpeg"
+              alt="Centinela Minero"
+              width={400}
+              height={400}
             />
           </div>
         </div>

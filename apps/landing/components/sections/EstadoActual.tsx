@@ -3,6 +3,7 @@ import Container from "@/components/ui/Container";
 import Card from "@/components/ui/Card";
 import SectionHeading from "@/components/ui/SectionHeading";
 import ProductPhotoPlaceholder from "@/components/ui/ProductPhotoPlaceholder";
+import Image from "next/image";
 
 const evidencia = [
   {
@@ -72,16 +73,22 @@ export default function EstadoActual() {
           </ul>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 h-full">
           {/* TODO: reemplazar con una fotografía real de la calibración/pruebas de laboratorio */}
-          <ProductPhotoPlaceholder
-            label="Foto real de calibración en laboratorio (pendiente)"
-            aspect="aspect-video"
+          <Image
+            src="/prueba-laboratorio.jpeg"
+            alt="Prueba en laboratorio"
+            className="w-full h-full rounded-xs aspect-video object-cover"
+            width={360}
+            height={360}
           />
-          {/* TODO: reemplazar con una captura real del dashboard de Plataforma COM */}
-          <ProductPhotoPlaceholder
-            label="Captura real de Plataforma COM (pendiente)"
-            aspect="aspect-video"
+
+          <Image
+            src="/com.png"
+            alt="Comunicación entre dispositivos"
+            className="w-full h-full rounded-xs aspect-video"
+            width={360}
+            height={360}
           />
         </div>
       </Container>

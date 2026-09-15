@@ -30,9 +30,14 @@ const schema = yup.object({
     .required("Escribe un mensaje")
     .min(10, "Cuéntanos un poco más (mínimo 10 caracteres)")
     .max(2000, "Máximo 2000 caracteres"),
+  // Campos ocultos para Formspree — no se validan ni los llena la persona.
+  _gotcha: yup.string().notRequired(),
+  _subject: yup.string().notRequired(),
 });
 
 type ContactFormValues = yup.InferType<typeof schema>;
+
+const FORMSPREE_ENDPOINT = process.env.NEXT_PUBLIC_FORMSPREE_ENDPOINT;
 
 const inputClasses =
   "rounded-sm border border-border-strong bg-bg px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none";
@@ -54,23 +59,39 @@ export default function ContactForm() {
       organizacion: "",
       tipoInteres: undefined,
       mensaje: "",
+      _gotcha: "",
+      _subject: "Nuevo contacto desde landing MINAC",
     },
   });
 
   const onSubmit = async (values: ContactFormValues) => {
     setSubmitError(null);
+
+    if (!FORMSPREE_ENDPOINT) {
+      // TODO: crea tu formulario en https://formspree.io y define
+      // NEXT_PUBLIC_FORMSPREE_ENDPOINT en .env.local — ver README.
+      setSubmitError(
+        "El formulario de contacto todavía no está configurado (falta NEXT_PUBLIC_FORMSPREE_ENDPOINT)."
+      );
+      return;
+    }
+
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(FORMSPREE_ENDPOINT, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify(values),
       });
 
       if (!res.ok) {
-        throw new Error("No se pudo enviar el mensaje");
+        throw new Error("Formspree respondió con un error");
       }
 
       setSubmitted(true);
+      reset();
     } catch {
       setSubmitError("No pudimos enviar tu mensaje. Intenta de nuevo en unos momentos.");
     }
@@ -87,10 +108,7 @@ export default function ContactForm() {
         <button
           type="button"
           className="mt-2 text-xs text-accent-strong underline underline-offset-2"
-          onClick={() => {
-            reset();
-            setSubmitted(false);
-          }}
+          onClick={() => setSubmitted(false)}
         >
           Enviar otro mensaje
         </button>
@@ -100,6 +118,19 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5" noValidate>
+      {/* Honeypot anti-spam nativo de Formspree: los bots suelen rellenar
+          todos los campos, incluido este, invisible para una persona real. */}
+      <input
+        type="text"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute left-[-9999px] h-px w-px opacity-0"
+        {...register("_gotcha")}
+      />
+      {/* Asunto fijo para identificar los correos de este formulario en Formspree. */}
+      <input type="hidden" {...register("_subject")} />
+
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Nombre" htmlFor="nombre" error={errors.nombre?.message}>
           <input
