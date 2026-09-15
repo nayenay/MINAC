@@ -36,7 +36,7 @@ export default function SensorValue({
         : "normal";
   const statusText = levelLabel(level);
   const valueText =
-    value === null ? "No disponible" : `${value.toFixed(1)} ppm`;
+    value === null || value === undefined ? "No disponible" : `${value.toFixed(1)} ppm`;
 
   return (
     <Card
