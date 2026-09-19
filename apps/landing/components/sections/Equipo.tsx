@@ -20,12 +20,12 @@ const integrantes = [
   {
     role: "COO",
     name: "Víctor Manuel Colón López",
-    image: "",
+    image: "/victor-manuel.jpeg",
   },
   {
     role: "Director Ejecutivo",
     name: "Jaime Gabriel Robles Félix",
-    image: "",
+    image: "/jaime.jpeg",
   },
 ];
 
