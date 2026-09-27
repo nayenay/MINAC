@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f7f6f3;
+  --color-bg-panel: #f2f0ea;
+
+  --color-border: #e4e1d9;
+  --color-border-strong: #cfcabd;
+
+  --color-text-primary: #171412;
+  --color-text-secondary: #57534e;
+  --color-text-muted: #8a8478;
+
+  --color-accent: #f2a302;
+  --color-accent-hover: #ce8b02;
+
+  --color-signal-green: #22c55e;
+  --color-signal-yellow: #eab308;
+  --color-signal-red: #ef4444;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-bg-subtle: var(--color-bg-subtle);
+  --color-bg-panel: var(--color-bg-panel);
+
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+
+  --color-signal-green: var(--color-signal-green);
+  --color-signal-yellow: var(--color-signal-yellow);
+  --color-signal-red: var(--color-signal-red);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: Arial, Helvetica, sans-serif;
+}

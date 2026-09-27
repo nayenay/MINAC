@@ -1,0 +1,35 @@
+{
+  "rules": {
+    "laboratorio": {
+      "burnin": {
+        "$practica": {
+          ".read": true,
+          ".write": "auth != null && auth.token.burnin_writer === true",
+          "$entryId": {
+            ".validate": "newData.hasChild('minutos')"
+          }
+        }
+      },
+      "sesiones": {
+        ".read": true,
+        ".write": false
+      },
+      "lecturas": {
+        ".read": true,
+        ".write": false
+      },
+      "eventos": {
+        ".read": true,
+        ".write": false
+      }
+    },
+    "monitoreo": {
+      ".read": false,
+      ".write": false
+    },
+    "historico": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}
